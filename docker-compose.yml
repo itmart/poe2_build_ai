@@ -1,0 +1,60 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: poe2_ai_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  python_service:
+    build:
+      context: ./python_service
+    volumes:
+      - ./python_service:/service
+    ports:
+      - "8001:8001"
+
+  web:
+    build:
+      context: ./app
+    command: bash -lc "rm -f tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0 -p 3000"
+    volumes:
+      - ./app:/rails
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/poe2_ai_development
+      REDIS_URL: redis://redis:6379/0
+      PYTHON_SERVICE_URL: http://python_service:8001
+      RAILS_ENV: development
+    depends_on:
+      - db
+      - redis
+      - python_service
+
+  worker:
+    build:
+      context: ./app
+    command: bash -lc "bundle exec sidekiq"
+    volumes:
+      - ./app:/rails
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/poe2_ai_development
+      REDIS_URL: redis://redis:6379/0
+      PYTHON_SERVICE_URL: http://python_service:8001
+      RAILS_ENV: development
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:

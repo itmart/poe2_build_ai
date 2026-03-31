@@ -1,0 +1,11 @@
+.env
+.DS_Store
+log/*
+tmp/*
+storage/*
+node_modules
+vendor/bundle
+.bundle
+coverage
+.python-version
+.venv
