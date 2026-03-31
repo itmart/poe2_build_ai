@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  archetype: one
+  patch_change: one
+  impact_score: 1.5
+  impact_kind: MyString
+  reasoning: MyText
+
+two:
+  archetype: two
+  patch_change: two
+  impact_score: 1.5
+  impact_kind: MyString
+  reasoning: MyText

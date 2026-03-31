@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  character_snapshot: one
+  mode: MyString
+  input_payload: 
+  output_payload: 
+
+two:
+  character_snapshot: two
+  mode: MyString
+  input_payload: 
+  output_payload: 

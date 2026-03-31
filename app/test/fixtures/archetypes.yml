@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  class_name: MyString
+  ascendancy_name: MyString
+  primary_skill: MyString
+  offense_tags: 
+  defense_tags: 
+  core_mechanics: 
+  leveling_notes: MyText
+  failure_modes: MyText
+
+two:
+  name: MyString
+  class_name: MyString
+  ascendancy_name: MyString
+  primary_skill: MyString
+  offense_tags: 
+  defense_tags: 
+  core_mechanics: 
+  leveling_notes: MyText
+  failure_modes: MyText

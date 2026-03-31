@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  class_name: MyString
+  ascendancy_name: MyString
+  level: 1
+  skills: 
+  stats: 
+  defenses: 
+  gear: 
+  passives: 
+  constraints: 
+
+two:
+  name: MyString
+  class_name: MyString
+  ascendancy_name: MyString
+  level: 1
+  skills: 
+  stats: 
+  defenses: 
+  gear: 
+  passives: 
+  constraints: 
