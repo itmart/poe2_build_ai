@@ -1,6 +1,9 @@
 class BasicPatchParser
   BUFF_WORDS = %w[increased more improved added buff]
   NERF_WORDS = %w[reduced less decreased removed nerf]
+  CHANGE_TYPE_KEYWORDS = %w[added removed buff nerf rework]
+  ENTITY_TYPE_KEYWORDS = %w[support skill minion passive unique mechanic]
+  TAG_KEYWORDS = %w[lightning fire cold minion bow projectile poison chaos support]
 
   def self.call(text)
     text.to_s.lines.filter_map do |line|
@@ -30,10 +33,9 @@ class BasicPatchParser
   def self.guess_change_type(line)
     lower = line.downcase
 
-    return "added" if lower.include?("added")
-    return "removed" if lower.include?("removed")
-    return "buff" if BUFF_WORDS.any? { |word| lower.include?(word) }
-    return "nerf" if NERF_WORDS.any? { |word| lower.include?(word) }
+    CHANGE_TYPE_KEYWORDS.each do |keyword|
+      return keyword if lower.include?(keyword)
+    end
 
     "rework"
   end
@@ -41,11 +43,9 @@ class BasicPatchParser
   def self.guess_entity_type(line)
     lower = line.downcase
 
-    return "support" if lower.include?("support")
-    return "skill" if lower.include?("skill") || lower.include?("arrow") || lower.include?("spell")
-    return "minion" if lower.include?("minion")
-    return "passive" if lower.include?("passive")
-    return "unique" if lower.include?("unique")
+    ENTITY_TYPE_KEYWORDS.each do |keyword|
+      return keyword if lower.include?(keyword)
+    end
 
     "mechanic"
   end
@@ -58,15 +58,9 @@ class BasicPatchParser
     lower = line.downcase
     tags = []
 
-    tags << "lightning" if lower.include?("lightning")
-    tags << "fire" if lower.include?("fire")
-    tags << "cold" if lower.include?("cold")
-    tags << "minion" if lower.include?("minion")
-    tags << "bow" if lower.include?("bow") || lower.include?("arrow")
-    tags << "projectile" if lower.include?("projectile") || lower.include?("arrow")
-    tags << "poison" if lower.include?("poison")
-    tags << "chaos" if lower.include?("chaos")
-    tags << "support" if lower.include?("support")
+    TAG_KEYWORDS.each do |tag|
+      tags << tag if lower.include?(tag)
+    end
 
     tags
   end
