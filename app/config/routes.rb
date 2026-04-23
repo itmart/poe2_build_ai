@@ -14,5 +14,11 @@ Rails.application.routes.draw do
   namespace :api do
     get  "/league_starters", to: "recommendations#league_starters"
     post "/diagnose_build",  to: "recommendations#diagnose_build"
+
+    resources :patch_documents, only: [:index, :show, :create] do
+      post :parse, on: :member
+    end
+
+    resources :patch_changes, only: [:index, :show]
   end
 end
