@@ -2,9 +2,7 @@ class Api::RecommendationsController < ApplicationController
   protect_from_forgery with: :null_session
 
   def league_starters
-    render json: {
-      archetypes: ArchetypeRecommender.call
-    }
+    render json: ArchetypeRecommender.call
   end
 
   def diagnose_build
