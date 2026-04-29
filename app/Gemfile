@@ -14,3 +14,7 @@ gem "pgvector"
 gem "ruby-openai"
 
 gem "propshaft"
+
+group :development do
+  gem "annotaterb"
+end
