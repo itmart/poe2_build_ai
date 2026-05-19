@@ -1,11 +1,21 @@
 class CharacterDoctor
   def self.call(snapshot)
     archetype = ArchetypeMatcher.call(snapshot)
+    match_breakdown = archetype ? ArchetypeMatcher.score_breakdown(snapshot, archetype) : {}
+    diagnosis_confidence = confidence_for(archetype, match_breakdown)
 
     general_issues = general_issues_for(snapshot)
     archetype_issues = archetype ? archetype_specific_issues_for(snapshot, archetype) : []
     gear_analysis = GearEvaluator.call(snapshot, archetype)
     focus_recommendations = ProblemFocusRecommender.call(snapshot, archetype, gear_analysis)
+    upgrade_plan = UpgradePlanner.call(
+      snapshot,
+      archetype,
+      general_issues,
+      archetype_issues,
+      gear_analysis
+    )
+
     recommendations = build_recommendations(
       snapshot,
       general_issues,
@@ -17,14 +27,28 @@ class CharacterDoctor
 
     {
       matched_archetype: archetype&.name,
+      diagnosis_confidence: diagnosis_confidence,
+      archetype_match_breakdown: match_breakdown,
       problem_focus: snapshot.constraints&.dig("problem_focus"),
       general_issues: general_issues,
       archetype_issues: archetype_issues,
       weakest_slots: gear_analysis[:weakest_slots],
       target_stats_by_slot: gear_analysis[:target_stats_by_slot],
       focus_recommendations: focus_recommendations,
+      upgrade_plan: upgrade_plan,
       recommendations: recommendations.uniq
     }
+  end
+
+  def self.confidence_for(archetype, match_breakdown)
+    return "low" unless archetype
+
+    total = match_breakdown.values.sum
+
+    return "high" if total >= 10
+    return "medium" if total >= 6
+
+    "low"
   end
 
   def self.general_issues_for(snapshot)
@@ -236,8 +260,7 @@ class CharacterDoctor
 
     recommendations.sort_by do |rec|
       text = rec.downcase
-      matched = priorities.any? { |keyword| text.include?(keyword) }
-      matched ? 0 : 1
+      priorities.any? { |keyword| text.include?(keyword) } ? 0 : 1
     end
   end
 end

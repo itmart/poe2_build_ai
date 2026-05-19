@@ -24,10 +24,16 @@ class Api::RecommendationsController < ApplicationController
     RecommendationRun.create!(
       character_snapshot: snapshot,
       mode: "diagnose_build",
-      input_payload: snapshot.attributes.slice(
-        "name", "class_name", "ascendancy_name", "level",
-        "skills", "stats", "defenses", "gear", "passives", "constraints"
-      ),
+      input_payload: {
+        class_name: snapshot.class_name,
+        ascendancy_name: snapshot.ascendancy_name,
+        level: snapshot.level,
+        skills: snapshot.skills,
+        defenses: snapshot.defenses,
+        gear: snapshot.gear,
+        passives: snapshot.passives,
+        constraints: snapshot.constraints
+      },
       output_payload: result
     )
 

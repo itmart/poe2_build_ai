@@ -1,34 +1,50 @@
 class ArchetypeMatcher
   def self.call(snapshot)
-    Archetype.all.max_by do |archetype|
-      score_for(snapshot, archetype)
+    scored = Archetype.all.map do |archetype|
+      {
+        archetype: archetype,
+        score: score_for(snapshot, archetype)
+      }
     end
+
+    scored.max_by { |row| row[:score] }&.dig(:archetype)
+  end
+
+  def self.score_breakdown(snapshot, archetype)
+    skill_names = extract_skill_names(snapshot.skills)
+    skill_blob = skill_names.join(" ").downcase
+
+    class_match = snapshot.class_name.to_s.downcase == archetype.class_name.to_s.downcase ? 3 : 0
+    ascendancy_match = snapshot.ascendancy_name.to_s.downcase == archetype.ascendancy_name.to_s.downcase ? 4 : 0
+    primary_skill_match = skill_names.any? { |skill| skill.downcase == archetype.primary_skill.to_s.downcase } ? 5 : 0
+
+    offense_matches = tag_match_count(skill_blob, archetype.offense_tags)
+    mechanic_matches = tag_match_count(skill_blob, archetype.core_mechanics)
+
+    {
+      class_match: class_match,
+      ascendancy_match: ascendancy_match,
+      primary_skill_match: primary_skill_match,
+      offense_matches: offense_matches,
+      mechanic_matches: mechanic_matches
+    }
   end
 
   def self.score_for(snapshot, archetype)
-    score = 0
+    breakdown = score_breakdown(snapshot, archetype)
 
-    score += 3 if snapshot.class_name.to_s.downcase == archetype.class_name.to_s.downcase
-    score += 4 if snapshot.ascendancy_name.to_s.downcase == archetype.ascendancy_name.to_s.downcase
+    breakdown[:class_match] +
+      breakdown[:ascendancy_match] +
+      breakdown[:primary_skill_match] +
+      breakdown[:offense_matches] +
+      breakdown[:mechanic_matches]
+  end
 
-    skill_names = extract_skill_names(snapshot.skills)
-
-    score += 5 if skill_names.any? { |skill| skill.downcase == archetype.primary_skill.to_s.downcase }
-
-    offense_tags = Array(archetype.offense_tags).map(&:downcase)
-    core_mechanics = Array(archetype.core_mechanics).map(&:downcase)
-
-    skill_blob = skill_names.join(" ").downcase
-
-    offense_tags.each do |tag|
-      score += 1 if skill_blob.include?(tag)
+  def self.tag_match_count(skill_blob, tags)
+    Array(tags).map(&:to_s).sum do |tag|
+      normalized = tag.downcase.gsub("_", " ")
+      skill_blob.include?(normalized) ? 1 : 0
     end
-
-    core_mechanics.each do |tag|
-      score += 1 if skill_blob.include?(tag.gsub("_", " "))
-    end
-
-    score
   end
 
   def self.extract_skill_names(skills)
