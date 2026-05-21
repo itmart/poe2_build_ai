@@ -15,6 +15,32 @@ class CharacterDoctor
       archetype_issues,
       gear_analysis
     )
+    python_scored_upgrade_plan = if archetype
+      PythonScoringClient.score_upgrade_plan(
+        archetype: {
+          name: archetype.name,
+          class_name: archetype.class_name,
+          ascendancy_name: archetype.ascendancy_name,
+          primary_skill: archetype.primary_skill
+        },
+        snapshot: {
+          class_name: snapshot.class_name,
+          ascendancy_name: snapshot.ascendancy_name,
+          level: snapshot.level,
+          skills: snapshot.skills,
+          defenses: snapshot.defenses,
+          gear: snapshot.gear,
+          constraints: snapshot.constraints
+        },
+        general_issues: general_issues,
+        archetype_issues: archetype_issues,
+        weakest_slots: gear_analysis[:weakest_slots],
+        upgrade_plan: upgrade_plan,
+        problem_focus: snapshot.constraints&.dig("problem_focus")
+      )
+    else
+      { "upgrade_plan" => upgrade_plan, "confidence" => 0.0 }
+    end
 
     recommendations = build_recommendations(
       snapshot,
@@ -35,7 +61,9 @@ class CharacterDoctor
       weakest_slots: gear_analysis[:weakest_slots],
       target_stats_by_slot: gear_analysis[:target_stats_by_slot],
       focus_recommendations: focus_recommendations,
-      upgrade_plan: upgrade_plan,
+      upgrade_plan: python_scored_upgrade_plan["upgrade_plan"] || upgrade_plan,
+      python_upgrade_plan_confidence: python_scored_upgrade_plan["confidence"],
+      python_upgrade_plan_error: python_scored_upgrade_plan["error"],
       recommendations: recommendations.uniq
     }
   end
